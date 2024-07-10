@@ -19,17 +19,19 @@ class RxImmer<T> {
     readonly state$ = new BehaviorSubject<T>({} as T);
     private readonly initialState: T | undefined = this.state$.value;
     private stateHistory = new Stack<T>();
-    constructor(state?: T,options?:{auditTime?:number}) {
+    private forwardHistory = new Stack<T>();
+    constructor(state?: T, options?: { auditTime?: number }) {
 
         if (state) {
             this.setState(state);
         }
         this.state$.pipe(
             distinctUntilChanged(),
-            auditTime(options?.auditTime||300),
+            auditTime(options?.auditTime || 300),
         ).subscribe((newState) => {
             if (this.stateHistory.size() === 0 || this.stateHistory.peek() !== newState) {
                 this.stateHistory.push(newState);
+                this.forwardHistory.clear(); // 清空前进历史，因为新的状态已经产生
             }
         });
     }
@@ -56,8 +58,10 @@ class RxImmer<T> {
         this.state$.next(newState);
     }
 
-    undo = ()=> {
+    undo = () => {
         if (this.stateHistory.size() > 1) {
+            const currentState = this.state$.value;
+            this.forwardHistory.push(currentState); // 将当前状态推入前进栈
             this.stateHistory.pop(); // 移除当前状态
             const previousState = this.stateHistory.peek();
             if (previousState) {
@@ -65,10 +69,22 @@ class RxImmer<T> {
             }
         }
     }
+
+    redo = () => {
+        if (this.forwardHistory.size() > 0) {
+            const nextState = this.forwardHistory.pop(); // 从前进栈中获取下一个状态
+            if (nextState) {
+                this.state$.next(nextState);
+                this.stateHistory.push(nextState); // 将状态推入历史栈
+            }
+        }
+    }
+
     reset() {
         this.state$.next(this.initialState as T);
         this.stateHistory.clear(); // 清空历史记录
         this.stateHistory.push(this.initialState as T); // 重新添加初始状态
+        this.forwardHistory.clear(); // 同时清空前进历史
     }
 
     private getState(): T {

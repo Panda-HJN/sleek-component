@@ -193,7 +193,10 @@ const Board = () => {
                 <div>{
                     `${JSON.stringify(edges)}`
                 }</div>
-                <button style={{position:"fixed",bottom:0,fontSize:"4em"}} onClick={flowModel.undo}>Back!</button>
+                <div style={{position:"fixed",bottom:0,fontSize:"4em",display:"flex"}}>
+                    <button  onClick={flowModel.undo}>Back!</button>
+                    <button  onClick={flowModel.redo}>Forward!</button>
+                </div>
             </div>
         </div>
     );
