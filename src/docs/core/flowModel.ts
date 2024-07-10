@@ -1,4 +1,4 @@
-import {Model} from "./model.ts";
+import {RxImmer} from "./rximmer.ts";
 import {EdgeType, FlowNodeType} from "../App.tsx";
 
 export interface FlowState {
@@ -106,7 +106,7 @@ const INITIAL_STATE: FlowState = {
     edges: initialEdges,
 };
 
-export class FlowModel extends Model<FlowState> {
+export class FlowModel extends RxImmer<FlowState> {
     constructor() {
         super(INITIAL_STATE);
     }
