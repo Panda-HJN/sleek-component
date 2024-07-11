@@ -1,7 +1,7 @@
 import React, {CSSProperties, Fragment, useEffect} from 'react';
 import {Rnd} from 'react-rnd';
 import {useModel} from "./core/useModel.tsx";
-import {flowModel} from "./core/flowModel.ts";
+import {flowModel} from "./core/flow.model.ts";
 
 
 type NodeNumber = number

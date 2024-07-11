@@ -3,13 +3,6 @@ import {BehaviorSubject} from 'rxjs';
 import {distinctUntilChanged, map,auditTime} from 'rxjs/operators';
 import {produce} from 'immer';
 import { Stack } from './stack.ts';
-
-// 可以对请求获取的东西先unknown类型
-// 通过类型守卫判断后再给予类型
-// unknown类似于把类型盖住 不让推断系统知道
-
-
-// type A  = string & number A就是never
 const assign = produce((draft, part) => {
     Object.assign(draft || {}, part);
 });
@@ -20,6 +13,7 @@ class RxImmer<T> {
     private readonly initialState: T | undefined = this.state$.value;
     private stateHistory = new Stack<T>();
     private forwardHistory = new Stack<T>();
+    // 前进+后退历史 想过双链表，但是不如用两个栈简单
     constructor(state?: T, options?: { auditTime?: number }) {
 
         if (state) {

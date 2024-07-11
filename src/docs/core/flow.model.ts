@@ -127,7 +127,33 @@ export class FlowModel extends RxImmer<FlowState> {
             };
         });
     }
-
+    // createUUid():number{
+    //     //遍历现有的nodes,给出与现有node不重复的id
+    //
+    // }
+    // // 从面板中拖拽一个node到board中，根据松手的位置创建新node
+    // addNode(position:{x:number,y:number}){
+    //     const id = this.createUUid();
+    //     this.setState(state => {
+    //         return {
+    //             ...state,
+    //             nodes:[
+    //                 ...state.nodes,
+    //                 {
+    //                     id,
+    //                     nextNode:[],
+    //                     position,
+    //                     width:100,
+    //                     height:100,
+    //                     style:{backgroundColor:'blueviolet'}
+    //                 }
+    //             ]
+    //         }
+    //     });
+    //
+    // }
+    // addEdge(sourceId:number,targetId:number){
+    // }
 }
 
 export const flowModel = new FlowModel();
