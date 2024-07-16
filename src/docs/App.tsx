@@ -1,8 +1,8 @@
 import React, {CSSProperties, Fragment, useEffect} from 'react';
-import {Rnd} from 'react-rnd';
+// import {Rnd} from 'react-rnd';
 import {useModel} from "./core/useModel.tsx";
 import {flowModel} from "./core/flow.model.ts";
-
+import {Rd} from "../components/rd"
 
 type NodeNumber = number
 /**
@@ -61,23 +61,24 @@ const FlowNode = (props: {
         justifyContent: 'center',
         alignItems: 'center',
         cursor: 'move',
-        opacity: 0.6
+        opacity: 0.6,
+        overflow:"hidden"
     };
 
     return (
-        <Rnd
-            bounds="parent"
-            position={props.flowNode.position}
+        <Rd
+            // bounds="parent"
+            initialPosition={props.flowNode.position}
             size={{width: props.flowNode.width, height: props.flowNode.height}}
-            onDragStop={(_, d) => props.onMove(props.flowNode.id, d.x, d.y)}
-            onDrag={(_, d) => props.onMove(props.flowNode.id, d.x, d.y)}
+            onDragStop={( d) => props.onMove(props.flowNode.id, d.x, d.y)}
+            onDrag={( d) => props.onMove(props.flowNode.id, d.x, d.y)}
         >
             <div style={{
                 ...style, ...props.flowNode.style,
                 width: props.flowNode.width,
                 height: props.flowNode.height
             }}>{props.children}</div>
-        </Rnd>
+        </Rd>
     );
 };
 
@@ -164,13 +165,16 @@ const Board = () => {
         <div
             style={{
                 position: 'relative',
-                width: '100%',
-                height: '80vh',
+                width: '60%',
+                height: '50vh',
                 border: '1px solid grey',
+                margin:"20em"
             }}
         >
             {nodes.map((node) => (
-                <FlowNode key={node.id} flowNode={node} onMove={handleDragStop}>{node.id}</FlowNode>
+                <FlowNode key={node.id} flowNode={node} onMove={handleDragStop}>
+                    <div style={{width:300,height:399}}>{node.id}</div>
+                    </FlowNode>
             ))}
             <svg style={{width: '100%', height: '100%'}}>
                 {edges.map((edge, index) => (
