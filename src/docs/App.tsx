@@ -3,6 +3,7 @@ import React, {CSSProperties, Fragment, useEffect} from 'react';
 import {useModel} from "./core/useModel.tsx";
 import {flowModel} from "./core/flow.model.ts";
 import {Rd} from "../components/rd"
+import {chatModel} from "./core/chat.model.ts";
 
 type NodeNumber = number
 /**
@@ -149,7 +150,7 @@ const Edge = (props: { edge: EdgeType, nodes: FlowNodeType[] }) => {
 
 const Board = () => {
     const {nodes, edges} = useModel(flowModel, 'nodes', 'edges')
-
+     const {highestFrequencyText,textList} = useModel(chatModel,"highestFrequencyText","textList")
     useEffect(() => {
         // 因为还没有修该edges数据的交互，这里暂时空缺
 
@@ -197,10 +198,17 @@ const Board = () => {
                 <div>{
                     `${JSON.stringify(edges)}`
                 }</div>
+                <div style={{color:"#fff",position:"fixed",top:0,right:0,width:300,maxHeight:"90vh",overflowY:"auto"}}>
+                    <div>{!!highestFrequencyText&&<h1>{highestFrequencyText}+1</h1>}</div>
+                    <div>{
+                        textList.map((t,k)=><div key={k}>{t}</div>)
+                    }</div>
+                </div>
                 <div style={{position:"fixed",bottom:0,fontSize:"4em",display:"flex"}}>
                     <button  onClick={flowModel.undo}>Back!</button>
                     <button  onClick={flowModel.redo}>Forward!</button>
                 </div>
+
             </div>
         </div>
     );

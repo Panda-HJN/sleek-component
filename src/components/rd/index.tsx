@@ -1,52 +1,64 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import './rd.css';
 
 type Position = {
     x: number;
     y: number;
-}
+};
+
 type RdProps = {
-    position?: Position
+    position?: Position;
     size?: { width: number; height: number };
-    initialPosition?: Position
+    initialPosition?: Position;
     onDrag?: (position: Position) => void;
     onDragStop?: (position: Position) => void;
     children?: React.ReactNode;
 };
 
-const Rd: React.FC<RdProps> = ({ position, initialPosition, onDrag, onDragStop, children }) => {
-    const [internalPosition, setInternalPosition] = useState(initialPosition || { x: 0, y: 0 });
+const Rd: React.FC<RdProps> = ({
+                                   position,
+                                   initialPosition,
+                                   onDrag,
+                                   onDragStop,
+                                   children,
+                               }) => {
+    const [internalPosition, setInternalPosition] = useState(initialPosition || {x: 0, y: 0});
     const [dragging, setDragging] = useState(false);
     const rdRef = useRef<HTMLDivElement>(null);
-    const [offset, setOffset] = useState({ x: 0, y: 0 });
+    const [offset, setOffset] = useState({x: 0, y: 0});
 
-    const upDateMouseOffset = (e: React.MouseEvent<HTMLDivElement> |MouseEvent) => {
+    const updateMouseOffset = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
         if (rdRef.current) {
             const rect = rdRef.current.getBoundingClientRect();
-           const offset={
-               x: e.clientX - rect.left,
-               y: e.clientY - rect.top
-           }
-            setOffset(offset)
-            return offset
+            const clientX = 'clientX' in e ? e.clientX : e.touches[0].clientX;
+            const clientY = 'clientY' in e ? e.clientY : e.touches[0].clientY;
+            const offset = {
+                x: clientX - rect.left,
+                y: clientY - rect.top,
+            };
+            setOffset(offset);
+            return offset;
         }
-    }
-    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-        upDateMouseOffset(e);
+    };
+
+    const dragStart = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+        updateMouseOffset(e);
         setDragging(true);
         if (onDrag) {
             onDrag(internalPosition);
         }
     };
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const move = (e: MouseEvent | TouchEvent) => {
         if (!dragging || !rdRef.current || !rdRef.current.parentNode) return;
         const rdElement = rdRef.current;
-        const parentElement = rdElement.parentNode as HTMLElement; // 更明确地断言父元素类型
+        const parentElement = rdElement.parentNode as HTMLElement;
         const parentRect = parentElement.getBoundingClientRect();
+        const clientX = 'clientX' in e ? e.clientX : e.touches[0].clientX;
+        const clientY = 'clientY' in e ? e.clientY : e.touches[0].clientY;
         const newPosition = {
-            x: e.clientX - parentRect.left - offset.x,
-            y: e.clientY - parentRect.top - offset.y
+            x: clientX - parentRect.left - offset.x,
+            y: clientY - parentRect.top - offset.y,
         };
         if (!position) {
             setInternalPosition(newPosition);
@@ -56,21 +68,30 @@ const Rd: React.FC<RdProps> = ({ position, initialPosition, onDrag, onDragStop, 
         }
     };
 
-    const handleMouseUp = () => {
+    const dragEnd = () => {
         setDragging(false);
-        setOffset({ x: 0, y: 0 })
+        setOffset({x: 0, y: 0});
         if (onDragStop) {
             onDragStop(position ?? internalPosition);
         }
     };
 
     useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => move(e);
+        const handleMouseUp = () => dragEnd();
+        const handleTouchMove = (e: TouchEvent) => move(e);
+        const handleTouchEnd = () => dragEnd();
+
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
+        document.addEventListener('touchmove', handleTouchMove, {passive: false});
+        document.addEventListener('touchend', handleTouchEnd);
 
         return () => {
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
+            document.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('touchend', handleTouchEnd);
         };
     }, [dragging, internalPosition, position]);
 
@@ -81,7 +102,7 @@ const Rd: React.FC<RdProps> = ({ position, initialPosition, onDrag, onDragStop, 
             ref={rdRef}
             className="sleek-rd"
             style={{
-                boxSizing:"border-box",
+                boxSizing: "border-box",
                 position: 'absolute',
                 top: currentPosition.y,
                 left: currentPosition.x,
@@ -89,13 +110,13 @@ const Rd: React.FC<RdProps> = ({ position, initialPosition, onDrag, onDragStop, 
                 height: '100px',
                 cursor: 'pointer',
             }}
-            onMouseDown={handleMouseDown}
+            onMouseDown={(e) => dragStart(e)}
+            onTouchStart={(e) => dragStart(e)}
         >
             {children}
             <div className="contral-cover"></div>
-
         </div>
     );
 };
 
-export { Rd };
+export {Rd};
